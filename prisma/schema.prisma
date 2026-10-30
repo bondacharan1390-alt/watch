@@ -1,0 +1,79 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Product {
+  id           String           @id @default(uuid())
+  slug         String           @unique
+  name         String
+  collection   String
+  tagline      String
+  description  String
+  story        String
+  priceINR     Int
+  primaryImage String
+  badge        String?
+  inStock      Boolean          @default(true)
+  featured     Boolean          @default(false)
+  variants     ProductVariant[]
+  orders       OrderItem[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model ProductVariant {
+  id           String   @id @default(uuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  caseMaterial String
+  dialColor    String
+  strapType    String
+  sku          String   @unique
+  priceINR     Int
+  stock        Int      @default(10)
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  city            String
+  state           String
+  postalCode      String
+  country         String
+  totalINR        Int
+  paymentStatus   String      @default("PAID_TEST_MODE")
+  paymentMethod   String
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+}
+
+model OrderItem {
+  id             String  @id @default(uuid())
+  orderId        String
+  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product @relation(fields: [productId], references: [id])
+  quantity       Int     @default(1)
+  unitPriceINR   Int
+  caseMaterial   String
+  dialColor      String
+  strapType      String
+  strapColor     String
+  dialStyle      String
+  engravingText  String?
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
